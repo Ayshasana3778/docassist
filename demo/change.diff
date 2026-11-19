@@ -1,0 +1,16 @@
+diff --git a/acme/client.py b/acme/client.py
+--- a/acme/client.py
++++ b/acme/client.py
+@@ -1,12 +1,14 @@
+-def make_client(api_key, base_url=DEFAULT_URL):
++def create_client(api_key, base_url=DEFAULT_URL):
+     return Client(api_key, base_url)
+
+-def retry_call(fn, attempts=3):
+-    ...
++def retry_call(fn, attempts=3, backoff=2.0):
++    ...
+
+-MAX_RETRIES = 3
++def export_report(path):
++    ...

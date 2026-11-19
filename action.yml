@@ -1,0 +1,29 @@
+name: docassist
+description: Detect documentation made stale by a pull request and comment with proposed updates.
+inputs:
+  docs:
+    description: Space-separated markdown files or directories to check
+    default: "README.md docs"
+  anthropic-api-key:
+    description: Optional. Enables LLM-written rewrites; without it, deterministic heuristics are used.
+    required: false
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Analyze PR
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        PYTHONPATH: ${{ github.action_path }}
+      run: |
+        git fetch origin "${{ github.base_ref }}" --depth=50
+        python -m docassist analyze --git "origin/${{ github.base_ref }}...HEAD" \
+          --docs ${{ inputs.docs }} --out docassist-report.md
+        cat docassist-report.md >> "$GITHUB_STEP_SUMMARY"
+    - name: Comment on PR
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        path: docassist-report.md

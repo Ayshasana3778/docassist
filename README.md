@@ -10,6 +10,17 @@ Zero dependencies (Python 3.10+ standard library only).
 
 ![docassist HTML report](assets/report.png)
 
+## Web app
+
+```bash
+python -m docassist serve --docs README.md docs
+```
+
+Opens a local page (127.0.0.1 only, nothing is uploaded). Paste the output of `git diff`, click **Analyze**,
+and tick the fixes you want. Safe renames are pre-ticked; removals and signature changes only add a review
+note and are unticked. **Apply selected fixes** edits your docs, and refuses if a file changed since the
+analysis. The server requires a per-run token and only accepts requests addressed to localhost.
+
 ## Try it
 
 ```bash

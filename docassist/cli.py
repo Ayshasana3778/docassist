@@ -75,7 +75,16 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--apply", action="store_true", help="write proposed edits to the docs")
     a.add_argument("--review", action="store_true", help="like --apply but ask y/N for each change")
     a.add_argument("--fail-on-stale", action="store_true", help="exit 1 if stale docs are found (CI gate)")
+    s = sub.add_parser("serve", help="run the local web app (paste a diff, review and apply fixes in the browser)")
+    s.add_argument("--docs", nargs="+", default=["README.md", "docs"], help="markdown files/dirs")
+    s.add_argument("--diff", help="optional diff file to pre-fill the page")
+    s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--no-open", action="store_true", help="do not open the browser automatically")
     args = ap.parse_args(argv)
+
+    if args.cmd == "serve":
+        from .server import serve
+        return serve(args.docs, args.diff, args.port, not args.no_open)
 
     if args.git:
         diff_text = subprocess.run(["git", "diff", args.git], capture_output=True, text=True, check=True).stdout

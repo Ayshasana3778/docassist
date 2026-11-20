@@ -1,3 +1,3 @@
-_pycache_/
+pycache
 *.pyc
 eval_results.csv

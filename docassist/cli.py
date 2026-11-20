@@ -70,6 +70,8 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--docs", nargs="+", default=["README.md", "docs"], help="markdown files/dirs")
     a.add_argument("--backend", choices=["auto", "heuristic", "llm"], default="auto")
     a.add_argument("--out", help="write the markdown report here instead of stdout")
+    a.add_argument("--html", metavar="FILE", help="also write a styled HTML report, e.g. report.html")
+    a.add_argument("--open", action="store_true", help="open the HTML report in your browser (use with --html)")
     a.add_argument("--apply", action="store_true", help="write proposed edits to the docs")
     a.add_argument("--review", action="store_true", help="like --apply but ask y/N for each change")
     a.add_argument("--fail-on-stale", action="store_true", help="exit 1 if stale docs are found (CI gate)")
@@ -92,6 +94,14 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.out).write_text(report, encoding="utf-8")
     else:
         print(report)
+    if args.html:
+        from .htmlreport import render_html
+        Path(args.html).write_text(
+            render_html(changes, findings, proposals, undocumented(changes, sections)), encoding="utf-8")
+        print(f"HTML report written to {args.html}", file=sys.stderr)
+        if args.open:
+            import webbrowser
+            webbrowser.open(Path(args.html).resolve().as_uri())
     if args.apply or args.review:
         n = apply_proposals(proposals, interactive=args.review)
         print(f"\nApplied {n} change(s).", file=sys.stderr)

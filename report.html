@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>docassist report</title><style>
+:root{--bg:#f6f7fb;--card:#fff;--ink:#1b1f2a;--muted:#5d6577;--line:#e3e6ef;--brand:#4f46e5;
+--add-bg:#e6f6ec;--add-ink:#14532d;--del-bg:#fde8e8;--del-ink:#7f1d1d;--hunk:#eef0ff;--code:#f0f2f8;
+--b-renamed:#2563eb;--b-removed:#dc2626;--b-modified:#d97706;--b-added:#059669}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1220;--card:#181c2e;--ink:#e8eaf3;--muted:#98a0b6;--line:#2a3050;
+--brand:#8b85ff;--add-bg:#12301f;--add-ink:#9be7b4;--del-bg:#3a1618;--del-ink:#ffb4b4;--hunk:#1d2240;--code:#232842}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:32px 16px 64px}
+header{margin-bottom:24px}
+.eyebrow{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand);font-weight:700}
+h1{margin:4px 0 6px;font-size:30px;line-height:1.2}
+.sub{color:var(--muted);margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:24px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.stat b{display:block;font-size:32px;line-height:1.1}
+.stat span{color:var(--muted);font-size:14px}
+h2{font-size:19px;margin:32px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.where{font-weight:650;word-break:break-word}
+.where small{color:var(--muted);font-weight:500}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.badge{font-size:13px;font-weight:600;color:#fff;border-radius:999px;padding:2px 10px}
+.renamed{background:var(--b-renamed)}.removed{background:var(--b-removed)}
+.modified{background:var(--b-modified)}.added{background:var(--b-added)}
+.why{margin:6px 0 12px;color:var(--muted)}
+code{background:var(--code);border-radius:5px;padding:1px 6px;font:14px ui-monospace,Consolas,monospace}
+pre{margin:0;overflow-x:auto;border:1px solid var(--line);border-radius:10px;
+font:13px/1.5 ui-monospace,Consolas,monospace;background:var(--card)}
+pre div{padding:0 12px;white-space:pre-wrap;word-break:break-word}
+.a{background:var(--add-bg);color:var(--add-ink)}.d{background:var(--del-bg);color:var(--del-ink)}
+.h{background:var(--hunk);color:var(--muted)}.f{color:var(--muted)}
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:24px;color:var(--muted);text-align:center}
+ul.plain{margin:0;padding-left:20px}
+footer{margin-top:40px;color:var(--muted);font-size:13px}
+@media(max-width:520px){h1{font-size:24px}.stat b{font-size:26px}}
+</style></head>
+<body><div class="wrap">
+<header><div class="eyebrow">docassist</div><h1>Documentation impact report</h1>
+<p class="sub">Which docs a code change may have made stale, and the proposed fixes.</p></header>
+<div class="stats">
+<div class="stat"><b>4</b><span>symbol changes detected</span></div>
+<div class="stat"><b>3</b><span>doc sections may be stale</span></div>
+<div class="stat"><b>1</b><span>possibly undocumented additions</span></div>
+</div>
+<h2>Affected documentation</h2><section class="card"><div class="where">demo\docs\usage.md <small>› Quick start</small></div><div class="badges"><span class="badge renamed">renamed: make_client → create_client</span></div><p class="why"><code>make_client</code> renamed to <code>create_client</code></p><pre><div class="f">--- a/demo\docs\usage.md</div><div class="f">+++ b/demo\docs\usage.md</div><div class="h">@@ -4,5 +4,5 @@</div><div class=""> </div><div class=""> ```python</div><div class="d">-client = make_client(api_key="...")</div><div class="a">+client = create_client(api_key="...")</div><div class=""> user = client.fetch_user(42)</div><div class=""> ```</div></pre></section><section class="card"><div class="where">demo\docs\usage.md <small>› Configuration</small></div><div class="badges"><span class="badge removed">removed: MAX_RETRIES</span></div><p class="why"><code>MAX_RETRIES</code> removed - needs a human decision</p><pre><div class="f">--- a/demo\docs\usage.md</div><div class="f">+++ b/demo\docs\usage.md</div><div class="h">@@ -4,2 +4,3 @@</div><div class=""> The default retry count is controlled by `MAX_RETRIES`.</div><div class=""> </div><div class="a">+&lt;!-- docassist: `MAX_RETRIES` was removed in this change; update or delete this reference --&gt;</div></pre></section><section class="card"><div class="where">demo\docs\usage.md <small>› Retries</small></div><div class="badges"><span class="badge modified">modified: retry_call</span></div><p class="why"><code>retry_call</code> signature changed</p><pre><div class="f">--- a/demo\docs\usage.md</div><div class="f">+++ b/demo\docs\usage.md</div><div class="h">@@ -3,2 +3,3 @@</div><div class=""> Failed calls are retried by `retry_call`, which backs off exponentially.</div><div class=""> </div><div class="a">+&lt;!-- docassist: signature of `retry_call` changed to: `def retry_call(fn, attempts=3, backoff=2.0):` - verify this section --&gt;</div></pre></section><h2>Possibly undocumented additions</h2><div class="card"><ul class="plain"><li><code>export_report</code> in <code>acme/client.py</code></li></ul></div>
+<footer>Generated 20 Nov 2026, 15:30. Proposed edits are suggestions: review before applying.</footer>
+</div></body></html>

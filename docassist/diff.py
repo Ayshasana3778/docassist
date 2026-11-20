@@ -81,6 +81,25 @@ def extract_symbols(lines: list[str]) -> list[Symbol]:
     return out
 
 
+_DUNDER = re.compile(r"^__\w+__$")
+_BRACKETS = re.compile(r"\[[^\[\]]*\]")
+_RETURN_ANN = re.compile(r"\s*->\s*[^:]*:\s*$")
+_PARAM_ANN = re.compile(r":\s*[\w\.\|\"' ]+?(?=\s*[,=)]|\s*$)")
+
+
+def normalize_sig(sig: str) -> str:
+    """Drop type annotations and spacing so a pure typing/formatting edit is not a signature change."""
+    s = sig.strip()
+    if not re.match(r"^(async\s+)?def\s", s):
+        return re.sub(r"\s+", " ", s)
+    s = _RETURN_ANN.sub(":", s)
+    while _BRACKETS.search(s):
+        s = _BRACKETS.sub("", s)
+    s = _PARAM_ANN.sub("", s)
+    s = re.sub(r"\s+", "", s).replace(",)", ")")
+    return s
+
+
 def _similar(a: str, b: str) -> float:
     return difflib.SequenceMatcher(None, a, b).ratio()
 
@@ -94,9 +113,11 @@ def diff_symbols(change: FileChange) -> list[SymbolChange]:
     results: list[SymbolChange] = []
 
     for name, o in old_by_name.items():
+        if _DUNDER.match(name):
+            continue  # __init__, __repr__ ...: docs almost never mean these by name
         if name in new_by_name:
             n = new_by_name[name]
-            if o.signature != n.signature:
+            if normalize_sig(o.signature) != normalize_sig(n.signature):
                 results.append(SymbolChange("modified", name, old_sig=o.signature,
                                             new_sig=n.signature, path=change.path))
 
@@ -131,4 +152,6 @@ def analyze_diff(text: str) -> list[SymbolChange]:
     out: list[SymbolChange] = []
     for fc in parse_diff(text):
         out.extend(diff_symbols(fc))
-    return out
+    # A symbol "removed" from one file but added/modified in another was moved, not deleted.
+    alive = {c.name for c in out if c.kind in ("added", "modified")}
+    return [c for c in out if not (c.kind == "removed" and c.name in alive)]
